@@ -1,0 +1,179 @@
+GRADER FILE
+
+CS61B -  Project 3 
+
+Arjun Mehta - cs61b-cx
+Shaurya Kalsi - cs61b-mi
+Kartikeya Gupta - cs61b-gd
+
+PART 1:
+
+	Structures Used for WUGraph.java:
+
+	1. graph
+		- Edge
+		- Neighbors
+		- Vertex
+		- VertexPair
+
+	2. dict package
+		- Dictionary
+		- Entry Class 
+		- HashTableChanied
+
+	3. list package
+		- DList
+		- DListNode
+
+
+
+
+IMPLEMENTATION OF PART 1 : WUGRAPH, PACKAGE GRAPH
+
+	Fields: 
+		vertexHashTable (HashTable)
+		edgeHashTable (HashTable)
+		vertexList (DList)
+		numberOfEdges (int)
+
+
+	This class is used to construct a graph with given vertices and edges.
+
+	Vertex
+		- Each Vertex object represents a given vertex object passed in by calling application as its "identity". 
+		- It contains a DList "edgeList" consisting of all the Edges that are incident on this vertex. 
+		- It also holds its degree (i.e. number of Edges connected to Vertex, or just size of edgeList).
+
+	Edge 
+		- Each Edge object represents a VertexPair as its "edge" (we use VertexPairs to represent the actual edges). 
+		- It stores its weight from vertices "u <-> v" of Edge(u,v). 
+		- It also contains a "partner" field that references another Edge object which is used to reference its Partner Edge of corresponding vertex, which is set to "this" in the case that the edge is a self edge. 
+		- "myNode"  keeps track of the DListNode in which the Edge object is contained. 
+		- parent1 and parent2 refer to the DListNodes in the vertexList that contain the 2 vertices forming the edge, u and v.
+
+	vertexList 
+		- is a DList which acts as an Adjacency List of Vertices. It is implemented as 
+		a circular DList, with each DListNode holding a unique Vertex object. 
+
+	vertexHashTable 
+		- is used to obtain and reference vertices from the VertexList in constant 
+		time. It is a HashTable which contains the object passed in by the calling application as the Key and references the 
+		DListNode of the corresponding Vertex object in the AdjacencyList as a Value.
+
+
+	edgeHashTable 
+		- hashes an edge so it can be referenced in constant time. It holds the edge, i.e. VertexPair 
+		as a Key. And the reference to the DListNode which holds the corresponding Edge object in the edgeList within each Vertex as 
+		a Value. 
+
+	All of the above help in the design and structural implementation of the graph.
+
+	Specific Design Implementation:
+	1. 	getVertices() - runs in O(|V|) time. V represents no. of Vertices. This runs in V time 
+		because it getVertices walks through the list of all vertices, vertexList, of length V. Each time it 
+		extracts the Identity of the Vertex (which is simply a reference to the object passed in by
+		the calling application) and stores it in an array, which is an O(1) time operation. Since this O(1)
+		operation is executed |V| number of times, the run time is O(|V|). The array is returned.
+		No other internal data structure is returned. 
+
+	2. 	removeVertex() - runs in O(d) time. d represents the degree of the Vertex. This runs 
+		in "d" time because everytime we remove a Vertex, all its edges also have to be removed. We must walk 
+		through the edgeList of the given vertex, each time calling removeEdge() to remove the Edge object and
+		its partner Edge (if any). removeEdge() by design is an O(1) operation, executed d times. The Vertex 
+		object is then removed from the vertexList using remove() method of DLists which is an O(1) operation 
+		and then removed from the vertexHashtable using the remove() method of HashTableChained which is also O(1). 
+		Hence the overall run time is O(d).
+
+
+	3. 	isVertex() and isEdge() run in constant time because they use the find() method of HashTableChained that 
+		is an O(1) operation. 
+
+	4. 	degree(), weight() and edgeCount() run in constant time because they are stored as 
+		fields in the Vertex Object and WUGraph respectively. We simply return these fields which is an
+		O(1) operation.
+
+	5. 	addVertex() and addEdge() run in constant time because they just take an object, 
+		hash it, add it to the hash table using the insert() method from HashTableChained which is an O(1) operation,
+		and then insertBack() to a Dlist which is also O(1). Hence overall is also O(1).
+
+	6. 	getNeighbours() runs in O(d) time because it simply iterates over a number of "d" edges of an edgeList of 
+		a vertex, to return a new Neighbour Object which references two arrays.
+
+
+
+PART 2: 
+
+	Structures used for Kruskal.java
+
+	1. graphalg
+		- Edge
+		- ListSorts
+
+	2. dict package
+		- Dictionary
+		- Entry Class 
+		- HashTableChanied
+
+	3. list package
+		- LinkedQueue
+		- Queue
+		- SList
+		- SListNode
+
+	4. set package
+		- DisjointSets
+
+
+IMPLEMENTATION OF PART 2 - KRUSKAL, PACKAGE GRAPHALG
+	
+	Variables:
+		t (WUGraph)
+		vertexHashTable (HashTableChained)
+		vertexSet (DisjointSets)
+		edgeQueue (LinkedQueue)
+		vertices (Object[])
+
+	This function takes in a graph and returns a new graph with a minimum spanning tree in it.
+
+	t is the new graph returned which contains a minimum spanning tree.
+
+	Edge 
+		- Not same as Edge object from part 1, contains only references to the 2 vertices (u, v) that 
+		form it, and the weight of the edge.
+
+	vertexHashTable 
+		- is a Hash Table which stores all unique Vertices as Keys and a Unique 
+		Integer object as its Value. These Values are used in the Implementation of DisjointSets, 
+		as indexes of the array of the Disjoint Set object to uniquely map the Vertices to integers.
+
+	vertexSet 
+		- is a DisjointSet object which stores all Vertices in an array.
+
+	edgeQueue 
+		- is a queue which contains all the Edge objects present in the given graph. Edges from 
+		this queue will be selected to form a minimum spanning tree.
+
+	vertices 
+		- holds a list of all the Vertices present in the graph.
+
+	Specific Design Implementation:
+
+	1. 	Adding a vertex to the new graph, inserting it into the hash table is an O(1) operation. 
+		getNeighbours() is an O(d) operation, and then walking through the list of neighbors for a 
+		given vertex and enqueueing the neighbour edges to the edgeQueue is also O(d). 
+		The loop iterates over |V| vertices, hence: 
+		- Runs in O|V| time, since each vertex does not have the same number of edges and 
+		2*|d| <= |E|, we ignore it.
+
+	2. mergeSort() of Edge queue (by weight).
+		- Runs in O(E log E) time
+
+	3. Iterating of a sorted edgeQueue to perform the minimum spanning tree implementation 
+	including Union() of the vertices (which is roughly O(1) when used in conjunction with find()).
+		-	Runs in O(E) time
+
+	Overall the function runs in O(V + E Log E + E) time. 
+	Because E is in O(E Log E), ------> The Function runs in O(V + E Log E) Time. <---------
+
+
+
